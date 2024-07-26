@@ -1,6 +1,7 @@
 import java.util.TreeSet;
 
 public class MovieTheaterSeat {
+    // Determining if any two friends can sit together based on the given conditions using method
     public boolean canFriendsSitTogether(int[] nums, int indexDiff, int valueDiff) {
         if (nums == null || nums.length < 2) {
             return false;
@@ -32,7 +33,7 @@ public class MovieTheaterSeat {
         int[] nums = {1, 2, 4, 6, 7};
         int indexDiff = 2;
         int valueDiff = 1;
-
+        //Checking if any two friends can sit together based on the given conditions
         System.out.println(m.canFriendsSitTogether(nums, indexDiff, valueDiff)); // Output: true
     }
 }
