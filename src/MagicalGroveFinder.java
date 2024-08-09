@@ -30,19 +30,16 @@ public class MagicalGroveFinder {
     public int largestMagicalGrove(TreeNode root) {
         if (root == null) return 0;
 
-        // Use an array to hold the maximum sum found so far (passing by reference)
+        // Using an array to hold the maximum sum found so far (passing by reference)
         int[] maxSum = new int[1];
         maxSum[0] = Integer.MIN_VALUE;
-
-        // Recursively find the maximum sum of BST subtrees
         findMaxSum(root, maxSum);
-
         return maxSum[0];
     }
 
     private Result findMaxSum(TreeNode node, int[] maxSum) {
         if (node == null) {
-            // Return a result with true (null node is considered a valid BST) and sum of 0
+            // Returning a result with true (null node is considered a valid BST) and sum of 0
             return new Result(true, 0, 0, 0);
         }
 
@@ -50,15 +47,15 @@ public class MagicalGroveFinder {
         Result leftResult = findMaxSum(node.left, maxSum);
         Result rightResult = findMaxSum(node.right, maxSum);
 
-        // Check if current node forms a BST using results from left and right subtrees
+        // Checking if current node forms a BST using results from left and right subtrees
         if (leftResult.isValid && rightResult.isValid &&
                 (node.left == null || node.val > leftResult.maxValue) &&
                 (node.right == null || node.val < rightResult.minValue)) {
 
-            // Calculate the sum of the current BST subtree
+            // Calculating the sum of the current BST subtree
             int currentSum = node.val + leftResult.sum + rightResult.sum;
 
-            // Update maxSum if currentSum is larger
+            // Updating maxSum if currentSum is larger
             maxSum[0] = Math.max(maxSum[0], currentSum);
 
             // Return a result indicating the current node forms a valid BST,
