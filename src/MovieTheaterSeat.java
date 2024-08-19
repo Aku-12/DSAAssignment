@@ -1,26 +1,27 @@
-import java.util.TreeSet;
+import java.util.HashMap;
 
 public class MovieTheaterSeat {
-    // Determining if any two friends can sit together based on the given conditions using method
+    // Determining if any two friends can sit together based on the given conditions using a HashMap
     public boolean canFriendsSitTogether(int[] nums, int indexDiff, int valueDiff) {
         if (nums == null || nums.length < 2) {
             return false;
         }
 
-        TreeSet<Integer> set = new TreeSet<>();
+        HashMap<Integer, Integer> map = new HashMap<>();
 
         for (int i = 0; i < nums.length; i++) {
-            // Finding the smallest number in the set that is >= nums[i] - valueDiff
-            Integer ceiling = set.ceiling(nums[i] - valueDiff);
-            if (ceiling != null && ceiling <= nums[i] + valueDiff) {
-                return true;
+            for (int key : map.keySet()) {
+                if (Math.abs(nums[i] - key) <= valueDiff && Math.abs(i - map.get(key)) <= indexDiff) {
+                    return true;
+                }
             }
 
-            set.add(nums[i]);
+            // Adding the current element and its index to the map
+            map.put(nums[i], i);
 
-            // Maintaining the sliding window
+            // Maintaining the sliding window of size indexDiff
             if (i >= indexDiff) {
-                set.remove(nums[i - indexDiff]);
+                map.remove(nums[i - indexDiff]);
             }
         }
 
@@ -33,7 +34,7 @@ public class MovieTheaterSeat {
         int[] nums = {1, 2, 4, 6, 7};
         int indexDiff = 2;
         int valueDiff = 1;
-        //Checking if any two friends can sit together based on the given conditions
-        System.out.println(m.canFriendsSitTogether(nums, indexDiff, valueDiff)); // Output: true
+        // Checking if any two friends can sit together based on the given conditions
+        System.out.println(m.canFriendsSitTogether(nums, indexDiff, valueDiff));
     }
 }
