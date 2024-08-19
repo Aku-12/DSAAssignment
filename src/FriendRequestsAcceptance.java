@@ -1,99 +1,89 @@
-import java.util.*;
+import java.util.Arrays;
 
 public class FriendRequestsAcceptance {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
 
-        // Reading number of houses
-        System.out.print("Number of houses: ");
-        int n = scanner.nextInt();
+    static class UnionFind {
+        int[] parent;
+        int[] rank;
 
-        // Reading restrictions
-        System.out.print("Number of restrictions: ");
-        int numRestrictions = scanner.nextInt();
-        List<int[]> restrictions = new ArrayList<>();
-        System.out.println("Enter restrictions as pairs (0-indexed):");
-        for (int i = 0; i < numRestrictions; i++) {
-            int house1 = scanner.nextInt();
-            int house2 = scanner.nextInt();
-            restrictions.add(new int[]{house1, house2});
-        }
-
-        // Reading friend requests
-        System.out.print("Number of friend requests: ");
-        int numRequests = scanner.nextInt();
-        List<int[]> requests = new ArrayList<>();
-        System.out.println("Enter requests as pairs (0-indexed):");
-        for (int i = 0; i < numRequests; i++) {
-            int house1 = scanner.nextInt();
-            int house2 = scanner.nextInt();
-            requests.add(new int[]{house1, house2});
-        }
-
-        // Solution logic
-        List<String> results = processRequests(n, restrictions, requests);
-
-        // Output results
-        System.out.println("Output:");
-        for (String result : results) {
-            System.out.println(result);
-        }
-
-        scanner.close();
-    }
-
-    // Method to process the friend requests
-    private static List<String> processRequests(int n, List<int[]> restrictions, List<int[]> requests) {
-        // Build adjacency list for restrictions
-        List<List<Integer>> graph = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            graph.add(new ArrayList<>());
-        }
-        for (int[] restriction : restrictions) {
-            int house1 = restriction[0];
-            int house2 = restriction[1];
-            graph.get(house1).add(house2);
-            graph.get(house2).add(house1);
-        }
-
-        // Processing each request
-        List<String> results = new ArrayList<>();
-        for (int[] request : requests) {
-            int house1 = request[0];
-            int house2 = request[1];
-
-            // Check if adding direct edge violates restrictions
-            if (canBeFriends(graph, n, house1, house2)) {
-                results.add("Approved");
-            } else {
-                results.add("Denied");
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            Arrays.fill(rank, 1);
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
             }
         }
-        return results;
-    }
 
-    // Helper method to check if adding an edge between house1 and house2 violates restrictions
-    private static boolean canBeFriends(List<List<Integer>> graph, int n, int house1, int house2) {
-        // Use BFS to check if there's a path from house1 to house2 through restricted houses
-        Queue<Integer> queue = new LinkedList<>();
-        boolean[] visited = new boolean[n];
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);  // Path compression to flatten the structure
+            }
+            return parent[x];
+        }
 
-        queue.add(house1);
-        visited[house1] = true;
-
-        while (!queue.isEmpty()) {
-            int current = queue.poll();
-
-            for (int neighbor : graph.get(current)) {
-                if (!visited[neighbor]) {
-                    if (neighbor == house2) {
-                        return false; // Found a path, so they can't be friends
-                    }
-                    visited[neighbor] = true;
-                    queue.add(neighbor);
+        public void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            if (rootX != rootY) {
+                if (rank[rootX] > rank[rootY]) {
+                    parent[rootY] = rootX;
+                } else if (rank[rootX] < rank[rootY]) {
+                    parent[rootX] = rootY;
+                } else {
+                    parent[rootY] = rootX;
+                    rank[rootX]++;
                 }
             }
         }
-        return true; // No path found, so they can be friends
+    }
+
+    public static String[] processFriendRequests(int n, int[][] restrictions, int[][] requests) {
+        UnionFind uf = new UnionFind(n);
+        String[] results = new String[requests.length];
+
+        for (int i = 0; i < requests.length; i++) {
+            int houseA = requests[i][0];
+            int houseB = requests[i][1];
+
+            int rootA = uf.find(houseA);
+            int rootB = uf.find(houseB);
+
+            boolean canBeFriends = true;
+
+            // Verifying restrictions
+            for (int[] restriction : restrictions) {
+                int restrictedA = uf.find(restriction[0]);
+                int restrictedB = uf.find(restriction[1]);
+
+                // If trying to union (rootA, rootB) would connect restrictedA and restrictedB, deny the request
+                if ((rootA == restrictedA && rootB == restrictedB) ||
+                        (rootA == restrictedB && rootB == restrictedA)) {
+                    canBeFriends = false;
+                    break;
+                }
+            }
+
+            if (canBeFriends) {
+                uf.union(houseA, houseB);
+                results[i] = "approved";
+            } else {
+                results[i] = "denied";
+            }
+        }
+
+        return results;
+    }
+
+    public static void main(String[] args) {
+        int n1 = 3;
+        int[][] restrictions1 = {{0, 1}};
+        int[][] requests1 = {{0, 2}, {2, 1}};
+        System.out.println(Arrays.toString(processFriendRequests(n1, restrictions1, requests1))); // Output: [approved, denied]
+
+        int n2 = 5;
+        int[][] restrictions2 = {{0, 1}, {1, 2}, {2, 3}};
+        int[][] requests2 = {{0, 4}, {1, 2}, {3, 1}, {3, 4}};
+        System.out.println(Arrays.toString(processFriendRequests(n2, restrictions2, requests2))); // Output: [approved, denied, approved, denied]
     }
 }

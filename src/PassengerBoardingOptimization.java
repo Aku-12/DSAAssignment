@@ -1,59 +1,79 @@
-import java.util.Arrays;
-import java.util.Scanner;
-
 public class PassengerBoardingOptimization {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
-        // Setting a sentinel value for continuing or stopping the input loop
-        boolean continueInput = true;
-
-        while (continueInput) {
-            // User input for the number of passengers
-            System.out.print("Enter the number of passengers (or enter 0 to stop): ");
-            int n = scanner.nextInt();
-
-            // Checking if the user wants to stop
-            if (n == 0) {
-                continueInput = false;
-                break;
-            }
-
-            // User input for the passenger head array
-            int[] head = new int[n];
-            System.out.print("Enter the passenger sequence: ");
-            for (int i = 0; i < n; i++) {
-                head[i] = scanner.nextInt();
-            }
-
-            // User input for the value of k
-            System.out.print("Enter the value of k: ");
-            int k = scanner.nextInt();
-
-            // Optimizing the boarding sequence
-            int[] optimizedSequence = optimizeBoarding(head, k);
-            System.out.println("Optimized Sequence: " + Arrays.toString(optimizedSequence));
+    // Node class for defining a linked list node
+    static class ListNode {
+        int val;
+        ListNode next;
+        ListNode(int val) {
+            this.val = val;
+            this.next = null;
         }
-
-        scanner.close();
+    }
+    //  reversing a part of the linked list
+    public static ListNode reverse(ListNode head, int k) {
+        ListNode prev = null;
+        ListNode curr = head;
+        ListNode next = null;
+        int count = 0;
+        while (curr != null && count < k) {
+            next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+            count++;
+        }
+        if (next != null) {
+            head.next = reverse(next, k);
+        }
+        return prev;
     }
 
-    public static int[] optimizeBoarding(int[] head, int k) {
-        int n = head.length;
+    // Function for optimizing the boarding process
+    public static ListNode optimizeBoarding(ListNode head, int k) {
+        if (head == null || k <= 1) return head;
+        return reverse(head, k);
+    }
 
-        // Loop through the array in chunks of size k
-        for (int i = 0; i < n; i += k) {
-            int left = i;
-            int right = Math.min(i + k - 1, n - 1); // Ensure the right index does not go out of bounds
+    //Printing the linked list
+    public static void printList(ListNode head) {
+        ListNode temp = head;
+        while (temp != null) {
+            System.out.print(temp.val + " ");
+            temp = temp.next;
 
-            // Reversing the elements in the current chunk
-            for (; left < right; left++, right--) {
-                int temp = head[left];
-                head[left] = head[right];
-                head[right] = temp;
-            }
         }
+        System.out.println();
+    }
 
-        return head;
+    // Main method to run the code
+    public static void main(String[] args) {
+        // Create the linked list: 1 -> 2 -> 3 -> 4 -> 5
+        ListNode head = new ListNode(1);
+        head.next = new ListNode(2);
+        head.next.next = new ListNode(3);
+        head.next.next.next = new ListNode(4);
+        head.next.next.next.next = new ListNode(5);
+
+        int k = 2;
+
+        System.out.println("Original list:");
+        printList(head);
+        ListNode optimizedHead = optimizeBoarding(head, k);
+        System.out.println("Optimized list with k = " + k + ":");
+        printList(optimizedHead);
+
+        // Another example with k = 3
+        head = new ListNode(1);
+        head.next = new ListNode(2);
+        head.next.next = new ListNode(3);
+        head.next.next.next = new ListNode(4);
+        head.next.next.next.next = new ListNode(5);
+
+        k = 3;
+
+        System.out.println("Original list:");
+        printList(head);
+        optimizedHead = optimizeBoarding(head, k);
+        System.out.println("Optimized list with k = " + k + ":");
+        printList(optimizedHead);
     }
 }
